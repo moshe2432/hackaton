@@ -33,6 +33,14 @@ def main():
             break
 
 
+def TCP_Payload(addres,size,file):
+    tcp_socket = socket(AF_INET, SOCK_STREAM)
+    tcp_socket.connect(addres)
+    file = open(file, "rb")  
+    data = file.read(size) + '\n'
+    tcp_socket.sendall(data.encode())
+    tcp_socket.close()
+
 def UDP_Payload(addres,size,file):
     socket = socket(AF_INET, SOCK_DGRAM)
     file = open(file, "rb")
@@ -56,6 +64,7 @@ def UDP_Payload(addres,size,file):
         header = struct.pack(0xabcddcba,0x04,size//packet_size + 1 ,index)  
         packet = header + data
         socket.sendto(packet.encode(), addres)
+    socket.close()
 
 
 def UDP_Brodcast():
