@@ -7,8 +7,9 @@ import struct
 def udp_client(server_ip,server_port):
     with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as udp_socket:
         while True:
-            message = input("enter message")
-            udp_socket.sendto(message.encode(),(server_ip,server_port))
+            message = input("enter size of the file: ")
+            packet = struct.pack(0xabcddcba,0x03,message)
+            udp_socket.sendto(packet.encode(),(server_ip,server_port))
             data,addr = udp_socket.recvfrom(1024)
             return data, addr 
         
