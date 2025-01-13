@@ -34,7 +34,7 @@ def UDP_Server():
         data, addr = udp_socket.recvfrom(1024)
         print("Server received", repr(data))
         header = struct.unpack(data[:13])
-        if header[0] != 0xabcddcba or header[1] != 0x02:
+        if header[0] != 0xabcddcba or header[1] != 0x03:
             continue
         _thread.start_new_thread(UDP_Payload,(addr,header[3],"file.txt"))
 
@@ -82,7 +82,7 @@ def UDP_Brodcast():
     UDP port: 0x303A
     TCP port: 0x303B
     """
-    packet = struct.pack(0xabcddcba,0x02,)  # Packet index as unsigned int
+    packet = struct.pack(0xabcddcba,0x02,0x303A,0x303B)  # Packet index as unsigned int
     # Define the port on which you want to connect
     port = 12345
 

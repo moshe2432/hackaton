@@ -19,6 +19,7 @@ def tcp_client(server_ip,server_port):
             tcp_socket.connect((server_ip,server_port))
             while True:
                 message = input("enter message")
+                message += "\n"
                 tcp_socket.sendall(message.encode())
                 data = tcp_socket.recvfrom(1024)
                 return data
