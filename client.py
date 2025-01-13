@@ -73,6 +73,7 @@ def UDP_Request(addres,size):
     
     #end timer
     end = time.time()
+    x= 0
 
     #calculate and print the speed
     print(f"UDP transfer {x} finished, total time: {end-start} seconds. \ntotal speed: {size/(end-start)} bits/second.\npercentage of packets received successfully: {len(packet_resived)*100/header[2]}")
