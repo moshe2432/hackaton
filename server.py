@@ -7,39 +7,43 @@ packet_size = 1024
 
 def main():
 
-    # Create a socket object
-    tcp_socet = socket(AF_INET, SOCK_STREAM)
-    print("Socket created")
+    _thread.start_new_thread(UDP_Brodcast,())
+    _thread.start_new_thread(TCP_Server,())
+    _thread.start_new_thread(UDP_Server,())
 
-    # Define the port on which you want to connect
-    port = 12345
-    Host_ip = '172.0.0.1'
-    
-
-    tcp_socet.bind((Host_ip, port))
-    print("socket binded to %s" % (port))
-    tcp_socet.listen()
-    print("socket is listening")
-    
-    conn, addr = tcp_socet.accept()
-
-    print("Got connection from", addr)
-    while True:
-        data = conn.recv(1024)
-        print("Server received", repr(data))
-        reply = input("Reply: ")
-        conn.sendall(reply.encode())
-        if not data:
-            break
-
-
-def TCP_Payload(addres,size,file):
+def TCP_Server():
+    #create a socket object
     tcp_socket = socket(AF_INET, SOCK_STREAM)
-    tcp_socket.connect(addres)
-    file = open(file, "rb")  
-    data = file.read(size) + '\n'
-    tcp_socket.sendall(data.encode())
-    tcp_socket.close()
+    port = 0x303B
+    tcp_socket.bind(('', port))
+    #start listening
+    tcp_socket.listen(5)
+    print("socket is listening")
+    while True:
+        conn, addr = tcp_socket.accept()
+        print("Got connection from", addr)
+        _thread.start_new_thread(TCP_Payload,(conn,addr,"file.txt"))
+
+def UDP_Server():
+    #create a socket object
+    udp_socket = socket(AF_INET, SOCK_DGRAM)
+    port = 0x303A
+    udp_socket.bind(('', port))
+    print("socket is listening")
+    while True:
+        data, addr = udp_socket.recvfrom(1024)
+        print("Server received", repr(data))
+        header = struct.unpack(data[:13])
+        if header[0] != 0xabcddcba or header[1] != 0x02:
+            continue
+        _thread.start_new_thread(UDP_Payload,(addr,header[3],"file.txt"))
+
+def TCP_Payload(conn,addr,file):
+    file = open(file, "rb")
+    data = conn.recv(1024)
+    data = file.read(data[:-1]) + '\n'
+    conn.send(data.encode())
+    conn.close()
 
 def UDP_Payload(addres,size,file):
     socket = socket(AF_INET, SOCK_DGRAM)
@@ -86,7 +90,6 @@ def UDP_Brodcast():
     while True:
         udp_socket.sendto(packet.encode(), ('<broadcast>', port))
         time.sleep(1)
-
 
 
 if __name__ == "__main__":
