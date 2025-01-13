@@ -2,25 +2,52 @@ from socket import *
 import time
 import struct
 
+
+
+def udp_client(server_ip,server_port):
+    with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as udp_socket:
+        while True:
+            message = input("enter message")
+            udp_socket.sendto(message.encode(),(server_ip,server_port))
+            data,addr = udp_socket.recvfrom(1024)
+            return data, addr 
+        
+
+def tcp_client(server_ip,server_port):
+    with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as tcp_socket:
+        try:
+            tcp_socket.connect((server_ip,server_port))
+            while True:
+                message = input("enter message")
+                tcp_socket.sendall(message.encode())
+                data = tcp_socket.recvfrom(1024)
+                return data
+            
+        except ConnectionRefusedError:
+            print("[TCP] unable to connect to the server")
+    
+
+
 def main():
-    # Create a socket object
-    tcp_socket = socket(AF_INET, SOCK_STREAM)
-    print("Socket created")
+    server_ip = input("enter server IP (deafault: 127.0.0.1): ") or "127.0.0.1"
+    server_port = int(input("enter server port (deafaut: 12345)") or 12345)
 
-    # Define the port on which you want to connect
-    port = 12345
-    Host_ip = input("Enter the IP address of the server: ")
+    while True: 
+        print("\nselect protocol: ")
+        print("1. UDP")
+        print("2. TCP")
 
-    tcp_socket.connect((Host_ip, port))
-    print("socket connected to %s" % (port))
-    while True:
-        message = input("Enter message: ")
-        tcp_socket.sendall(message.encode())
-        data = tcp_socket.recv(1024)
-        print("Client received", repr(data))
+        choice = input("enter your choice: ")
+
+        if choice == "1":
+            udp_client(server_ip,server_port)
+        elif choice == "2":
+            tcp_client(server_ip,server_port)
         time.sleep(1)
-        if not data:
-            break
+
+
+
+
 
 def UDP_Request(addres,size):
     socket = socket(AF_INET, SOCK_DGRAM)
