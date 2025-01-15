@@ -7,15 +7,15 @@ import threading
 
 def udp_client(addres,size):
     #opening socket for the tcp connection
-    tcp_socket = socket(AF_INET, SOCK_DGRAM)
+    udp_socket = socket(AF_INET, SOCK_DGRAM)
     packet = struct.pack('I B I',0xabcddcba,0x03,size)
-    tcp_socket.sendto(packet, addres)
+    udp_socket.sendto(packet, addres)
     packet_resived = []
     #start timer
     start = time.time()
     #receive the packets
     while True:
-        data = tcp_socket.recv(1045)
+        data = udp_socket.recv(1045)
         if not data:
             break
         #parse the header
