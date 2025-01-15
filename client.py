@@ -5,17 +5,17 @@ import struct
 
 
 def udp_client(server_ip,server_port):
-    with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as udp_socket:
+    with socket(AF_INET,SOCK_DGRAM) as udp_socket:
         while True:
-            message = input("enter size of the file: ")
-            packet = struct.pack(0xabcddcba,0x03,message)
-            udp_socket.sendto(packet.encode(),(server_ip,server_port))
+            message = int(input("enter size of the file: "))
+            packet = struct.pack(f'I B I',0xabcddcba,0x03,message)
+            udp_socket.sendto(packet,(server_ip,server_port))
             data,addr = udp_socket.recvfrom(1024)
             return data, addr 
         
 
 def tcp_client(server_ip,server_port):
-    with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as tcp_socket:
+    with socket(AF_INET,SOCK_STREAM) as tcp_socket:
         try:
             tcp_socket.connect((server_ip,server_port))
             while True:
