@@ -66,7 +66,7 @@ def UDP_Payload(addres,size,file):
         Total segment count: unsigned int, size/packet_size
         Packet index: unsigned int, index
         """
-        header = struct.pack(0xabcddcba,0x04,size//packet_size + 1 ,index)  
+        header = struct.pack('I B L',0xabcddcba,0x04,size//packet_size + 1 ,index)  
         packet = header + data
         socket.sendto(packet.encode(), addres)
     socket.close()
