@@ -6,7 +6,8 @@ import struct
 packet_size = 1024
 
 def main():
-
+    print("starting brodcast")
+    #UDP_Brodcast()
     _thread.start_new_thread(UDP_Brodcast,())
     _thread.start_new_thread(TCP_Server,())
     _thread.start_new_thread(UDP_Server,())
@@ -22,7 +23,7 @@ def TCP_Server():
     while True:
         conn, addr = tcp_socket.accept()
         print("Got connection from", addr)
-        _thread.start_new_thread(TCP_Payload,(conn,addr,"file.txt"))
+        _thread.start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
 
 def UDP_Server():
     #create a socket object
@@ -36,7 +37,7 @@ def UDP_Server():
         header = struct.unpack(data[:13])
         if header[0] != 0xabcddcba or header[1] != 0x03:
             continue
-        _thread.start_new_thread(UDP_Payload,(addr,header[3],"file.txt"))
+        _thread.start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
 
 def TCP_Payload(conn,addr,file):
     file = open(file, "rb")
@@ -82,13 +83,13 @@ def UDP_Brodcast():
     UDP port: 0x303A
     TCP port: 0x303B
     """
-    packet = struct.pack(0xabcddcba,0x02,0x303A,0x303B)  # Packet index as unsigned int
+    packet = struct.pack('I B H H',0xabcddcba,0x02,0x303A,0x303B)  # Packet index as unsigned int
     # Define the port on which you want to connect
     port = 12345
 
     udp_socket.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     while True:
-        udp_socket.sendto(packet.encode(), ('<broadcast>', port))
+        udp_socket.sendto(packet, ('<broadcast>', port))
         time.sleep(1)
 
 
