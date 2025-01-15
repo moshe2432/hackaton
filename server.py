@@ -1,16 +1,30 @@
 from socket import *
 import time
-import _thread
+import threading
 import struct
 
 packet_size = 1024
 
 def main():
     print("starting brodcast")
-    #UDP_Brodcast()
-    _thread.start_new_thread(UDP_Brodcast,())
-    _thread.start_new_thread(TCP_Server,())
-    _thread.start_new_thread(UDP_Server,())
+    thread1 = threading.Thread(target=UDP_Brodcast)
+    UDP_Brodcast()
+    #_thread.start_new_thread(UDP_Brodcast,())
+    print("starting TCP server")
+    thread2 = threading.Thread(target=TCP_Server)
+    print("starting UDP server")
+    thread3 = threading.Thread(target=UDP_Server)
+
+    thread1.start()
+    thread2.start()
+    thread3.start()
+
+    thread1.join()
+    thread2.join()
+    thread3.join()
+
+
+
 
 def TCP_Server():
     #create a socket object
@@ -23,7 +37,8 @@ def TCP_Server():
     while True:
         conn, addr = tcp_socket.accept()
         print("Got connection from", addr)
-        _thread.start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
+        threading._start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
+        #_thread.start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
 
 def UDP_Server():
     #create a socket object
@@ -37,7 +52,8 @@ def UDP_Server():
         header = struct.unpack(data[:13])
         if header[0] != 0xabcddcba or header[1] != 0x03:
             continue
-        _thread.start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
+        threading._start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
+        #_thread.start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
 
 def TCP_Payload(conn,addr,file):
     file = open(file, "rb")
