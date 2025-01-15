@@ -36,8 +36,10 @@ def TCP_Server():
     print("TCP socket is listening")
     thredList =[]
     while True:
+        #connection with client
         conn, addr = tcp_socket.accept()
-        print("Got connection from", addr)
+        print("Got TCP connection from", addr)
+        #create a new thread to send the file
         therd = threading.Thread(target=TCP_Payload,args=(conn,addr,"file.pdf"))
         thredList.append(therd)
         therd.start()
@@ -52,12 +54,16 @@ def UDP_Server():
     thredList =[]
     print("UDP socket is listening")
     while True:
+        #get a packet
         data, addr = udp_socket.recvfrom(1024)
-        print("Server received", repr(data))
-        header = struct.unpack('',data[:13])
+        print("Got UDP connection from", addr)
+        #unpack the header
+        header = struct.unpack('I B L',data[:13])
+        #check if the packet is a file request
         if header[0] != 0xabcddcba or header[1] != 0x03:
             continue
-        therd = threading.Thread(target=UDP_Payload,args=(addr,"file.pdf"))
+        #create a new thread to send the file
+        therd = threading.Thread(target=UDP_Payload,args=(addr,header[2],"file.pdf"))
         thredList.append(therd)
         therd.start()
     for t in thredList:
@@ -65,17 +71,30 @@ def UDP_Server():
 
 
 def TCP_Payload(conn,addr,file):
+    print("TCP payload")
+    #open the file
     file = open(file, "rb")
+
+    #get the size of the file
     data = conn.recv(1024)
-    data = file.read(data[:-1]) + '\n'
-    conn.send(data.encode())
+    size = int(data[:-1])
+    print("Server received", size)
+
+    #send the file
+    dataToSend = str(file.read(size)) + '\n'
+    conn.send(dataToSend.encode())
     conn.close()
 
 def UDP_Payload(addres,size,file):
-    socket = socket(AF_INET, SOCK_DGRAM)
+    print("UDP payload")
+    #create a socket object
+    Udp_socket = socket(AF_INET, SOCK_DGRAM)
+    #open the file
     file = open(file, "rb")
+
     index = 0
     while size:
+        #read the file
         if size > packet_size:
             data = file.read(packet_size)
             size -= packet_size
@@ -93,8 +112,11 @@ def UDP_Payload(addres,size,file):
         """
         header = struct.pack('I B L L',0xabcddcba,0x04,size//packet_size + 1 ,index)  
         packet = header + data
-        socket.sendto(packet.encode(), addres)
-    socket.close()
+
+        #send part of the file
+        Udp_socket.sendto(packet, addres)
+        
+    Udp_socket.close()
 
 
 def UDP_Brodcast():
