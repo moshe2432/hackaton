@@ -58,28 +58,25 @@ def main():
     broadcast_socket = socket(AF_INET,SOCK_DGRAM)
     port = 12345
     broadcast_socket.bind(('',port))
-    AddressList = []
     TheredsList = []
+    data,addr = broadcast_socket.recvfrom(1024)
 
     while num_of_tcp_connections or num_of_udp_connections: 
-        data,addr = broadcast_socket.recvfrom(1024)
-        if addr not in AddressList:
-            AddressList.append(addr)
-            head = struct.unpack('I B H H',data[:10])
-            new_tcp_address = (addr[0],head[3])
-            new_udp_address = (addr[0],head[2])
-            if num_of_tcp_connections > 0:
-                thread1 = threading.Thread(target=tcp_client,args=(new_tcp_address,file_size))
-                thread1.start()
-                TheredsList.append(thread1)
-                print("starting a thred")
-                num_of_tcp_connections = num_of_tcp_connections - 1 
+        head = struct.unpack('I B H H',data[:10])
+        new_tcp_address = (addr[0],head[3])
+        new_udp_address = (addr[0],head[2])
+        if num_of_tcp_connections > 0:
+            thread1 = threading.Thread(target=tcp_client,args=(new_tcp_address,file_size))
+            thread1.start()
+            TheredsList.append(thread1)
+            print("starting a thred")
+            num_of_tcp_connections = num_of_tcp_connections - 1 
 
-            if num_of_udp_connections > 0:
-                thread1 = threading.Thread(target=udp_client,args=(new_udp_address,file_size))
-                thread1.start()
-                TheredsList.append(thread1)
-                num_of_udp_connections = num_of_udp_connections -1 
+        if num_of_udp_connections > 0:
+            thread1 = threading.Thread(target=udp_client,args=(new_udp_address,file_size))
+            thread1.start()
+            TheredsList.append(thread1)
+            num_of_udp_connections = num_of_udp_connections -1 
 
 
     for thred in TheredsList:
