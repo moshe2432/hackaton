@@ -8,7 +8,7 @@ packet_size = 1024
 def main():
     print("starting brodcast")
     thread1 = threading.Thread(target=UDP_Brodcast)
-    UDP_Brodcast()
+    
     #_thread.start_new_thread(UDP_Brodcast,())
     print("starting TCP server")
     thread2 = threading.Thread(target=TCP_Server)
@@ -33,7 +33,7 @@ def TCP_Server():
     tcp_socket.bind(('', port))
     #start listening
     tcp_socket.listen(5)
-    print("socket is listening")
+    print("TCP socket is listening")
     while True:
         conn, addr = tcp_socket.accept()
         print("Got connection from", addr)
@@ -45,7 +45,7 @@ def UDP_Server():
     udp_socket = socket(AF_INET, SOCK_DGRAM)
     port = 0x303A
     udp_socket.bind(('', port))
-    print("socket is listening")
+    print("UDP socket is listening")
     while True:
         data, addr = udp_socket.recvfrom(1024)
         print("Server received", repr(data))
