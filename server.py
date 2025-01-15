@@ -34,26 +34,35 @@ def TCP_Server():
     #start listening
     tcp_socket.listen(5)
     print("TCP socket is listening")
+    thredList =[]
     while True:
         conn, addr = tcp_socket.accept()
         print("Got connection from", addr)
-        threading._start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
-        #_thread.start_new_thread(TCP_Payload,(conn,addr,"file.pdf"))
+        therd = threading.Thread(target=TCP_Payload,args=(conn,addr,"file.pdf"))
+        thredList.append(therd)
+        therd.start()
+    for t in thredList:
+        t.join()
 
 def UDP_Server():
     #create a socket object
     udp_socket = socket(AF_INET, SOCK_DGRAM)
     port = 0x303A
     udp_socket.bind(('', port))
+    thredList =[]
     print("UDP socket is listening")
     while True:
         data, addr = udp_socket.recvfrom(1024)
         print("Server received", repr(data))
-        header = struct.unpack(data[:13])
+        header = struct.unpack('',data[:13])
         if header[0] != 0xabcddcba or header[1] != 0x03:
             continue
-        threading._start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
-        #_thread.start_new_thread(UDP_Payload,(addr,header[3],"file.pdf"))
+        therd = threading.Thread(target=UDP_Payload,args=(addr,"file.pdf"))
+        thredList.append(therd)
+        therd.start()
+    for t in thredList:
+        t.join()
+
 
 def TCP_Payload(conn,addr,file):
     file = open(file, "rb")
@@ -82,7 +91,7 @@ def UDP_Payload(addres,size,file):
         Total segment count: unsigned int, size/packet_size
         Packet index: unsigned int, index
         """
-        header = struct.pack('I B L',0xabcddcba,0x04,size//packet_size + 1 ,index)  
+        header = struct.pack('I B L L',0xabcddcba,0x04,size//packet_size + 1 ,index)  
         packet = header + data
         socket.sendto(packet.encode(), addres)
     socket.close()
@@ -91,7 +100,7 @@ def UDP_Payload(addres,size,file):
 def UDP_Brodcast():
     # Create a socket object
     udp_socket = socket(AF_INET, SOCK_DGRAM)
-    print("Socket created")
+    print("Brodcast Socket created")
     """
     9 bit messege:
     magic number: 0xabcddcba
